@@ -1,0 +1,169 @@
+\documentclass[12pt]{article}
+\usepackage[margin=1in]{geometry} 
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{glossaries}
+
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+
+\usepackage{tcolorbox}
+\tcbuselibrary{theorems}
+
+\newtcbtheorem[number within=section]{theorem}{Theorem}%
+{colback=blue!5!white,colframe=blue!75!black,fonttitle=\bfseries}{th}
+
+\newtcbtheorem[number within=section]{lemma}{Lemma}%
+{colback=green!5!white,colframe=green!75!black,fonttitle=\bfseries}{le}
+
+\newtcbtheorem[number within=section]{exercise}{Exercise}%
+{colback=orange!5!white,colframe=orange!75!black,fonttitle=\bfseries}{ex}
+
+\newtcbtheorem[number within=section]{equation_maths}{Equation}%
+{colback=orange!5!white,colframe=orange!75!black,fonttitle=\bfseries}{ex}
+
+\newtcbtheorem[number within=section]{formula}{Formula}%
+{colback=yellow!5!white,colframe=yellow!75!black,fonttitle=\bfseries}{fo}
+
+\newtcbtheorem[number within=section]{corollary}{Corollary}%
+{colback=purple!5!white,colframe=purple!75!black,fonttitle=\bfseries}{co}
+
+\setlength{\parskip}{1em}
+
+\newacronym{ode}{ODE}{Ordinary Differential Equation}
+
+\begin{document}
+
+\title{Orbital Propagator}
+\author{Diego Toledo Luque\\ %replace with your name
+Mathematics and Computer Science \\
+University of Malaga}
+\date{\today}
+\maketitle
+
+\section{Introduction}
+
+The accurate prediction of satellite trajectories is a fundamental task in astrodynamics, with applications ranging from mission planning and collision avoidance to Earth observation and satellite constellation management. At the heart of this task lies the numerical integration of the equations of motion that govern orbital dynamics, typically modeled as second-order differential equations influenced by gravitational forces and perturbations.
+
+In this project, we develop and implement an orbital propagator capable of simulating the trajectory of a satellite under Earth's gravity. The goal is to obtain a balance between physical fidelity and computational efficiency, enabling reliable simulations over extended time spans. While more sophisticated propagators often include perturbative effects such as atmospheric drag, solar radiation pressure, and non-spherical gravity fields, this work focuses on establishing a robust baseline by considering the primary gravitational interaction between a satellite and a central body.
+
+\section{Preliminaries and Assumptions}
+
+In this project we will make certain assumptions to simplify the calculations and allow us to focus on the implementation and solution of \gls{ode} using numerical methods. Among the assumptions we will make, the following stand out:
+
+\begin{itemize}
+    \item We consider that the Earth is spherical.
+    \item We will only take into consideration the gravitational attraction caused by the Earth.
+\end{itemize}
+
+Once this is established, let us begin to introduce the physical and mathematical concepts that we are going to solve. Already in the 17th century, Newton introduced in his book \textit{Philosophiæ Naturalis Principia Mathematica} the Universal Law of Gravitation which is given by:
+
+\begin{formula}{Universal Law of Gravitation}{gravitation}
+    % Formula in larger size (example \Large)
+    {\Large
+    \[
+    \vec{F} = -\frac{mMG}{|\vec{r}|^2} \frac{\vec{r}}{|\vec{r}|}
+    \]
+    }
+    where:
+    \begin{itemize}
+        \item $\vec{F}$ is the gravitational force vector
+        \item $m$ is the mass of the satellite
+        \item $M$ is the mass of the Earth
+        \item $G$ is the gravitational constant
+        \item $\vec{r}$ is the position vector from Earth's center to the satellite
+        \item $|\vec{r}|$ is the magnitude of the position vector
+    \end{itemize}
+\end{formula}
+
+In the same book Newton introduced what are known as \textit{Newton's Laws}, in particular the one that is of our interest is:
+
+\begin{formula}{Second Newton's Law}{second}
+    {\Large
+    \[
+    \vec{F} = m \vec{a}
+    \]
+    }
+    where
+    \begin{itemize}
+        \item $\vec{F}$ is the total force received by the body
+        \item $m$ is the mass of the body
+        \item $\vec{a}$ is the acceleration that the body undergoes.
+    \end{itemize}
+\end{formula}
+
+Assuming that the satellite only experiences the attractive gravitational force received from the Earth and taking into account, thanks to differential calculus, that $\ddot{\vec{r}} = \vec{a}$, we arrive at the fact that $\vec{r}(t)$, the position of the satellite as a function of time, is given by the following \gls{ode}:
+
+\begin{equation_maths}{Satellite Orbit ODE}{satorbit}
+    {\Large
+    \[
+    \ddot{\vec{r}} = - \frac{MG}{|\vec{r}|^3} \vec{r}
+    \]
+    }
+\end{equation_maths}
+
+Therefore, the problem of calculating the orbit for a satellite that orbits around the Earth or any celestial body is reduced to the solution of this \gls{ode}, which can be approximated using numerical methods.
+
+\section{Non-Dimensionalization of the Equation}
+When solving numerical problems on computers, we must consider that discretization is necessary to compute a solution. During discretization, we introduce certain errors that can become amplified when working with numbers of vastly different scales (very large and very small values). To mitigate these numerical issues and improve computational stability, it is advantageous to non-dimensionalize our equations by introducing appropriate scaling factors.
+Let us introduce the following dimensionless variables:
+\begin{itemize}
+\item $\tau = \frac{t}{t_0}$ (dimensionless time)
+\item $\vec{R} = \frac{\vec{r}}{r_0}$ (dimensionless position)
+\end{itemize}
+where $t_0$ and $r_0$ are characteristic time and length scales, respectively.
+Taking derivatives with respect to the original time variable $t$:
+\[
+\frac{d\vec{r}}{dt} = \frac{d(r_0\vec{R})}{dt} = r_0\frac{d\vec{R}}{dt} = r_0\frac{d\vec{R}}{d\tau}\frac{d\tau}{dt} = \frac{r_0}{t_0}\frac{d\vec{R}}{d\tau}
+\]
+
+\[
+\frac{d^2\vec{r}}{dt^2} = \frac{r_0}{t_0^2}\frac{d^2\vec{R}}{d\tau^2}
+\]
+
+Substituting these expressions into our original ODE:
+
+\[
+\frac{r_0}{t_0^2}\frac{d^2\vec{R}}{d\tau^2} = -\frac{MG}{|\vec{r}|^3}\vec{r} = -\frac{MG}{(r_0|\vec{R}|)^3}(r_0\vec{R}) = -\frac{MG}{r_0^2}\frac{\vec{R}}{|\vec{R}|^3}
+\]
+
+Rearranging terms:
+
+\[
+\frac{d^2\vec{R}}{d\tau^2} = -\frac{t_0^2MG}{r_0^3}\frac{\vec{R}}{|\vec{R}|^3}
+\]
+
+To eliminate the coefficient on the right-hand side, we choose our characteristic time scale as:
+
+\[
+t_0 = \sqrt{\frac{r_0^3}{MG}}
+\]
+
+This choice yields the beautifully simplified dimensionless equation:
+
+\begin{equation_maths}{Dimensionless Orbital Equation}{dimless}
+    {\large
+    \[
+    \frac{d^2\vec{R}}{d\tau^2} = -\frac{\vec{R}}{|\vec{R}|^3}
+    \]
+    }
+\end{equation_maths}
+
+This second-order ODE can be decomposed into a system of first-order ODEs:
+
+\begin{equation_maths}{First-Order System}{firstorder}
+    {\large
+    \[
+    \begin{cases}
+    \dot{\vec{R}} = \vec{V} \\
+    \dot{\vec{V}} = -\frac{\vec{R}}{|\vec{R}|^3}
+    \end{cases}
+    \]
+    }
+\end{equation_maths}
+
+where $\vec{V}$ represents the dimensionless velocity vector.
+
+For practical implementation, we can choose $r_0 = |\vec{r}(0)|$, the initial distance from the central body, which provides a natural length scale for the problem.
+\end{document}

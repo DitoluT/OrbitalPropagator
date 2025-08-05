@@ -1,14 +1,14 @@
-from Integrators import *
-import matplotlib.pyplot as plt
-from numpy import pi
-import numpy as np
-import pandas as pd
-import csv
+from Integrators import * # Numerical integrators
 
-plt.rcParams['figure.figsize'] = [12, 8]  # Default figure size
-plt.rcParams['figure.dpi'] = 100  # DPI setting
-plt.rcParams['savefig.dpi'] = 150  # For saved figures
+import os # For file path handling
 
+import matplotlib.pyplot as plt # For plotting results
+
+import numpy as np # For numerical operations
+
+import csv # For reading CSV files
+
+import pandas as pd # For data manipulation
 
 
 # Parse a .csv file with satellite time, position and velocity (PVT) for plotting

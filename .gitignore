@@ -1,0 +1,13 @@
+./DS_Store
+.DS_Store
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pdb
+*.egg-info/
+*.eggs/
+*.ipynb_checkpoints
+*.vscode/
+*.idea/
+*.vscode-test/

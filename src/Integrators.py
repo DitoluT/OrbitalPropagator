@@ -112,11 +112,11 @@ def Kepler_Verlet(pos_init, vel_init, t_initial, t_final, Npoints):
     pos, vel, dt_nd, t_0, r_0 = nondimensionalize(pos, vel, dt)
     
     for i in range(Npoints - 1):
-        rhs_pos, rhs_vel = Orbital_RHS_Dimensionalized(pos[:, i], vel[:, i])
+        rhs_pos, rhs_vel = Orbital_RHS(pos[:, i], vel[:, i])
         v_half = vel[:, i] + rhs_vel * dt_nd / 2.0
-        rhs_pos, rhs_vel = Orbital_RHS_Dimensionalized(pos[:, i], v_half)
+        rhs_pos, rhs_vel = Orbital_RHS(pos[:, i], v_half)
         pos[:, i + 1] = pos[:, i] + rhs_pos * dt_nd
-        rhs_pos, rhs_vel = Orbital_RHS_Dimensionalized(pos[:, i + 1], v_half)
+        rhs_pos, rhs_vel = Orbital_RHS(pos[:, i + 1], v_half)
         vel[:, i + 1] = v_half + rhs_vel * dt_nd / 2.0
 
     pos, vel = dimensionalize(pos, vel, t_0, r_0)
@@ -221,7 +221,7 @@ def Kepler_Euler_Dimensionalized(pos_init, vel_init, t_initial, t_final, Npoints
     vel[:, 0] = np.array(vel_init)
 
     for i in range(Npoints - 1):
-        rhs_pos, rhs_vel = Orbital_RHS(pos[:, i], vel[:, i])
+        rhs_pos, rhs_vel = Orbital_RHS_Dimensionalized(pos[:, i], vel[:, i])
         pos[:, i + 1] = pos[:, i] + rhs_pos * dt
         vel[:, i + 1] = vel[:, i] + rhs_vel * dt
 
